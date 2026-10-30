@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Travel Planner</title>
+<style>
+  :root {
+    --cream: #fbf8f3; --paper: #fff; --line: #e9e0d4; --ink: #2a1f19; --muted: #7a6b5e;
+    --accent: #a35d2b; --accent-hover: #8a4d22; --accent-soft: #f4e6d6; --espresso: #2b1e18;
+    --danger: #b3382c; --shadow: 0 1px 2px rgba(42,31,25,.06), 0 8px 24px rgba(42,31,25,.08);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px; color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--cream); }
+  button, textarea { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .shell { height: 100%; display: flex; flex-direction: column; max-width: 860px; margin: 0 auto; background: var(--cream); }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--paper);
+  }
+  .wordmark { font-family: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; font-style: italic; font-size: 26px; color: var(--accent); letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .btn { border: 1px solid var(--line); background: var(--paper); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 500; }
+  .btn:hover { background: #f6f0e8; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+  main { flex: 1; overflow-y: auto; padding: 22px 24px 8px; scroll-behavior: smooth; }
+
+  .welcome { text-align: center; padding: 48px 8px 8px; }
+  .welcome h1 { margin: 0 0 8px; font-size: 24px; }
+  .welcome p { margin: 0 auto 22px; color: var(--muted); max-width: 460px; line-height: 1.5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .chip { border: 1px solid var(--line); background: var(--paper); border-radius: 12px; padding: 10px 14px; cursor: pointer; text-align: left; max-width: 340px; line-height: 1.4; font-size: 14px; }
+  .chip:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+  .row { display: flex; margin: 0 0 16px; gap: 10px; }
+  .row.user { justify-content: flex-end; }
+  .avatar { width: 34px; height: 34px; border-radius: 9px; background: var(--espresso); color: #e9c9a4; display: grid; place-items: center; font-family: Georgia, serif; font-style: italic; font-weight: 700; flex: none; }
+  .bubble { max-width: min(640px, 82%); padding: 11px 15px; border-radius: 16px; line-height: 1.55; overflow-wrap: anywhere; }
+  .user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; white-space: pre-wrap; }
+  .bot .bubble { background: var(--paper); border: 1px solid var(--line); border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(42,31,25,.04); }
+  .bot .bubble.error { border-color: #e7b9b3; background: #fdf3f1; color: var(--danger); }
+  .bubble a { color: var(--accent); }
+  .bubble code { font: 13px ui-monospace, Menlo, Consolas, monospace; background: #f1e8dc; padding: 1px 5px; border-radius: 4px; }
+  .bubble pre { margin: 8px 0; padding: 12px 14px; background: var(--espresso); color: #f3e7d6; border-radius: 8px; overflow-x: auto; }
+  .bubble pre code { background: none; padding: 0; color: inherit; }
+  .bubble ul, .bubble ol { margin: 6px 0; padding-left: 22px; }
+  .bubble p { margin: 0 0 8px; } .bubble p:last-child { margin-bottom: 0; }
+  .bubble h3 { margin: 10px 0 4px; font-size: 15px; }
+
+  .dots { display: inline-flex; gap: 5px; padding: 6px 2px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite ease-in-out; }
+  .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%,80%,100% { opacity: .25; transform: scale(.85); } 40% { opacity: 1; transform: scale(1); } }
+
+  form { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; margin: 8px 24px 10px; padding: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+  form:focus-within { border-color: var(--accent); }
+  textarea { border: 0; resize: none; max-height: 180px; padding: 6px 8px; background: transparent; line-height: 1.5; }
+  textarea:focus { outline: none; }
+  .hint { text-align: center; color: var(--muted); font-size: 11.5px; margin: 0 24px 14px; }
+
+  @media (max-width: 600px) {
+    header, main { padding-left: 14px; padding-right: 14px; }
+    form { margin-left: 12px; margin-right: 12px; }
+    .bubble { max-width: 90%; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div>
+      <div class="wordmark">Strevilatte AI Travel Planner</div>
+      <div class="sub">Your travel planning assistant</div>
+    </div>
+    <button id="new-chat" class="btn" type="button">New chat</button>
+  </header>
+
+  <main id="log" aria-live="polite"></main>
+
+  <form id="composer">
+    <textarea id="input" rows="1" maxlength="4000" placeholder="Ask anything about your trip…" aria-label="Message"></textarea>
+    <button id="send" class="btn primary" type="submit">Send</button>
+  </form>
+  <p class="hint">Enter to send · Shift+Enter for a new line</p>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+  const log = $('#log'), input = $('#input'), sendBtn = $('#send');
+
+  const SUGGESTIONS = [
+    'Plan a 5-day trip from Bangalore to Goa with flights and hotels, 10–15 Nov 2026, for 2 adults',
+    'Weekend getaway from Bangalore, somewhere with hills and good food',
+    'I want to travel to Jaipur next month. What do you need to know from me?'
+  ];
+
+  /* ── session: one id per chat, kept in the browser (no login) ── */
+  const newId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^A-Za-z0-9_-]/g, '');
+  let session;
+  try { session = JSON.parse(localStorage.getItem('sv_chat')); } catch (_) { session = null; }
+  if (!session || !session.id || !Array.isArray(session.msgs)) session = { id: newId(), msgs: [] };
+  const save = () => { try { localStorage.setItem('sv_chat', JSON.stringify({ id: session.id, msgs: session.msgs.slice(-100) })); } catch (_) {} };
+
+  /* ── safe text formatting: escape first, then re-enable a few patterns ── */
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function inline(s) {
+    return s
+      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?]|$)/g, '$1<em>$2</em>')
+      .replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+  function format(text) {
+    const stash = [];
+    const keep = (h) => { stash.push(h); return `\u0000${stash.length - 1}\u0000`; };
+    let s = text.replace(/```([\s\S]*?)```/g, (_, c) => keep(`<pre><code>${esc(c.replace(/^[^\n]*\n/, m => /^\w*\n$/.test(m) ? '' : m).trimEnd())}</code></pre>`));
+    s = s.replace(/`([^`\n]+)`/g, (_, c) => keep(`<code>${esc(c)}</code>`));
+    const out = [];
+    let list = null;
+    const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
+    for (const raw of esc(s).split('\n')) {
+      let m;
+      if ((m = raw.match(/^\s*[-*•]\s+(.*)/))) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${inline(m[1])}</li>`); }
+      else if ((m = raw.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${inline(m[1])}</li>`); }
+      else if ((m = raw.match(/^#{1,4}\s+(.*)/))) { closeList(); out.push(`<h3>${inline(m[1])}</h3>`); }
+      else if (!raw.trim()) { closeList(); out.push(''); }
+      else if (/^\u0000\d+\u0000$/.test(raw.trim())) { closeList(); out.push(raw.trim()); }
+      else { closeList(); out.push(`<p>${inline(raw)}</p>`); }
+    }
+    closeList();
+    return out.join('').replace(/\u0000(\d+)\u0000/g, (_, i) => stash[+i]);
+  }
+
+  /* ── rendering ── */
+  const scrollDown = () => { log.scrollTop = log.scrollHeight; };
+
+  function bubble(role, text, cls) {
+    const row = document.createElement('div'); row.className = `row ${role}`;
+    if (role === 'bot') { const av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S'; row.append(av); }
+    const b = document.createElement('div'); b.className = 'bubble' + (cls ? ' ' + cls : '');
+    if (role === 'user') b.textContent = text; else b.innerHTML = format(text);
+    row.append(b);
+    return row;
+  }
+
+  function renderAll() {
+    log.replaceChildren();
+    if (!session.msgs.length) {
+      const w = document.createElement('div'); w.className = 'welcome';
+      w.innerHTML = '<h1>Where would you like to go?</h1><p>Tell me about your trip and I will help you plan it. I will ask for anything I need to know, like dates, travellers and where you are starting from.</p>';
+      const chips = document.createElement('div'); chips.className = 'chips';
+      for (const s of SUGGESTIONS) {
+        const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.textContent = s;
+        c.addEventListener('click', () => ask(s));
+        chips.append(c);
+      }
+      w.append(chips); log.append(w);
+      return;
+    }
+    for (const m of session.msgs) log.append(bubble(m.role, m.text, m.error ? 'error' : ''));
+    scrollDown();
+  }
+
+  /* ── sending ── */
+  let busy = false;
+  function setBusy(v) { busy = v; sendBtn.disabled = v; }
+
+  async function ask(text) {
+    text = (text || '').trim();
+    if (!text || busy) return;
+    setBusy(true);
+    if (!session.msgs.length) log.replaceChildren();
+    session.msgs.push({ role: 'user', text }); save();
+    log.append(bubble('user', text));
+
+    const wait = document.createElement('div'); wait.className = 'row bot';
+    wait.innerHTML = '<div class="avatar">S</div><div class="bubble"><span class="dots"><i></i><i></i><i></i></span></div>';
+    log.append(wait); scrollDown();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session.id, message: text })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Something went wrong. Please try again.');
+      wait.remove();
+      session.msgs.push({ role: 'bot', text: data.reply }); save();
+      log.append(bubble('bot', data.reply));
+    } catch (err) {
+      wait.remove();
+      const msg = err instanceof TypeError ? 'Could not reach the server. Check that it is running and try again.' : err.message;
+      session.msgs.push({ role: 'bot', text: msg, error: true }); save();
+      log.append(bubble('bot', msg, 'error'));
+    } finally {
+      setBusy(false); scrollDown(); input.focus();
+    }
+  }
+
+  /* ── composer ── */
+  const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 180) + 'px'; };
+  $('#composer').addEventListener('submit', (e) => { e.preventDefault(); const t = input.value; input.value = ''; grow(); ask(t); });
+  input.addEventListener('input', grow);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('#composer').requestSubmit(); }
+  });
+
+  $('#new-chat').addEventListener('click', () => {
+    if (busy) return;
+    if (session.msgs.length && !confirm('Start a new chat? The current conversation will be cleared.')) return;
+    session = { id: newId(), msgs: [] }; save(); renderAll(); input.focus();
+  });
+
+  renderAll();
+  input.focus();
+})();
+</script>
+</body>
+</html>

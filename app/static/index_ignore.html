@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strevilatte</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<!-- ───────────── Sign in / Create account ───────────── -->
+<section id="auth" class="auth" hidden>
+  <div class="auth-card">
+    <div class="wordmark">Strevilatte</div>
+    <p class="tagline">Focused conversation for professional teams.</p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-mode="login" role="tab">Sign in</button>
+      <button type="button" class="tab" data-mode="register" role="tab">Create account</button>
+    </div>
+
+    <form id="auth-form">
+      <label id="name-row" hidden>Full name
+        <input name="display_name" maxlength="40" autocomplete="name" placeholder="Priya Sharma">
+      </label>
+      <label>Username
+        <input name="username" required minlength="3" maxlength="24" autocomplete="username" placeholder="priya.sharma">
+      </label>
+      <label>Password
+        <input name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" placeholder="At least 8 characters">
+      </label>
+      <p id="auth-error" class="error" role="alert"></p>
+      <button id="auth-submit" class="btn primary block" type="submit">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<!-- ───────────── Workspace ───────────── -->
+<div id="app" class="app" hidden>
+  <aside id="sidebar" class="sidebar">
+    <div class="side-head">
+      <span class="wordmark small">Strevilatte</span>
+    </div>
+
+    <nav class="side-scroll">
+      <div class="side-section">
+        <div class="side-title">
+          <span>Channels</span>
+          <button id="add-channel" class="icon-btn" type="button" title="Create channel" aria-label="Create channel">+</button>
+        </div>
+        <ul id="channel-list" class="nav"></ul>
+      </div>
+
+      <div class="side-section">
+        <div class="side-title">
+          <span>Direct messages</span>
+          <button id="add-dm" class="icon-btn" type="button" title="New message" aria-label="New direct message">+</button>
+        </div>
+        <ul id="dm-list" class="nav"></ul>
+      </div>
+    </nav>
+
+    <div class="side-foot">
+      <div id="me-avatar" class="avatar sm"></div>
+      <div class="me-meta">
+        <div id="me-name" class="me-name"></div>
+        <div class="me-status"><span class="presence on"></span>Active</div>
+      </div>
+      <button id="signout" class="icon-btn" type="button" title="Sign out" aria-label="Sign out">⎋</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="menu-btn" class="icon-btn menu" type="button" aria-label="Open sidebar">☰</button>
+      <div class="titles">
+        <h1 id="chan-title">Strevilatte</h1>
+        <p id="chan-topic" class="topic"></p>
+      </div>
+      <span id="status" class="status" hidden>Reconnecting…</span>
+      <form id="search-form" class="search" role="search">
+        <input id="search-input" type="search" placeholder="Search messages" aria-label="Search messages" autocomplete="off">
+        <kbd>Ctrl K</kbd>
+      </form>
+    </header>
+
+    <section id="messages" class="messages" aria-live="polite"></section>
+    <div id="typing" class="typing" aria-live="polite"></div>
+
+    <form id="composer" class="composer">
+      <textarea id="composer-input" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Message"></textarea>
+      <button id="send-btn" class="btn primary" type="submit">Send</button>
+      <div class="hint">Enter to send · Shift+Enter for a new line · **bold**, _italic_, `code`, ``` code blocks ```</div>
+    </form>
+  </main>
+</div>
+
+<!-- ───────────── Dialogs ───────────── -->
+<dialog id="channel-dialog">
+  <form id="channel-form">
+    <h2>Create a channel</h2>
+    <p class="muted">Channels keep conversations organised by team, project or topic.</p>
+    <label>Name
+      <input name="name" required minlength="2" maxlength="31" placeholder="product-launch" autocomplete="off">
+    </label>
+    <label>Topic <span class="muted">(optional)</span>
+      <input name="topic" maxlength="120" placeholder="What is this channel for?" autocomplete="off">
+    </label>
+    <p id="channel-error" class="error" role="alert"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn primary">Create channel</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dm-dialog">
+  <div class="dialog-body">
+    <h2>New direct message</h2>
+    <input id="dm-filter" type="search" placeholder="Find a teammate" autocomplete="off">
+    <ul id="dm-users" class="pick-list"></ul>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="search-dialog">
+  <div class="dialog-body">
+    <h2 id="search-title">Search results</h2>
+    <ul id="search-results" class="pick-list"></ul>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toasts" class="toasts" aria-live="assertive"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
