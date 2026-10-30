@@ -12,3 +12,4 @@ def SupervisorAgent(state: TravelPlannerState) -> TravelPlannerState:
     state["missing_fields"] = merged.missing_fields()
     print(state["missing_fields"])
     return state
+
