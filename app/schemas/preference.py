@@ -9,7 +9,7 @@ class TripPreferences(BaseModel):
     stop_location : Annotated[Optional[list[str]], Field(max_length=100, description= "Stop location, which stop it he/she will be stop,in travel order, origin not included", default= None)]
     return_to_base : Annotated[Optional[bool], Field(description= "Return to base", default= None)]
     days_of_itinerary : Optional[int] = None
-    adults : Optional[int]= Field(None, description="Number of adults. Use null if the user has not said. Never use placeholder text.")
+    adults : Optional[int]= Field(None, description="Number of adults.Use null if not stated.")
     children : Optional[int]= Field(None, description="Number of children. Use null if not stated.")
     no_of_old_ages : Optional[int]= None
     budget : Optional[int|float]= None
@@ -31,7 +31,7 @@ class TripPreferences(BaseModel):
         return v
 
     REQUIRED_FIELD: ClassVar[list[str]] = [
-        "source", "stop_location", "return_to_base", "start_date", "adults", "end_date"
+        "source", "stop_location", "return_to_base", "start_date", "adults"
     ]
 
     def missing_fields(self) -> list[str]:

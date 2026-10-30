@@ -81,6 +81,7 @@ def chat(body: ChatIn):
     except Exception:
         log.exception("travel planner failed")
         raise HTTPException(500, "The assistant ran into a problem. Please try again.")
+
     return {"reply": to_reply(result) or "I couldn't produce an answer for that. Could you rephrase it?"}
 
 
